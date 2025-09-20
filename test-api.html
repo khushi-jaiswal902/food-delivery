@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Food API</title>
+</head>
+<body>
+    <h1>Test Food API</h1>
+    
+    <h2>Test List Endpoint</h2>
+    <button onclick="testList()">Test List</button>
+    <div id="listResult"></div>
+    
+    <h2>Test Add Endpoint</h2>
+    <form id="addForm">
+        <input type="text" id="name" placeholder="Name" value="Test Food"><br>
+        <textarea id="description" placeholder="Description" value="Test Description"></textarea><br>
+        <input type="number" id="price" placeholder="Price" value="15.99"><br>
+        <select id="category">
+            <option value="Salad">Salad</option>
+            <option value="Rolls">Rolls</option>
+        </select><br>
+        <input type="file" id="image" accept="image/*"><br>
+        <button type="submit">Test Add</button>
+    </form>
+    <div id="addResult"></div>
+
+    <script>
+        const baseURL = 'http://localhost:4000';
+        
+        async function testList() {
+            try {
+                const response = await fetch(`${baseURL}/api/food/list`);
+                const data = await response.json();
+                document.getElementById('listResult').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('listResult').innerHTML = 'Error: ' + error.message;
+            }
+        }
+        
+        document.getElementById('addForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('name', document.getElementById('name').value);
+            formData.append('description', document.getElementById('description').value);
+            formData.append('price', document.getElementById('price').value);
+            formData.append('category', document.getElementById('category').value);
+            formData.append('image', document.getElementById('image').files[0]);
+            
+            try {
+                const response = await fetch(`${baseURL}/api/food/add`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                document.getElementById('addResult').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                if (data.success) {
+                    // Test list again to see if item was added
+                    setTimeout(testList, 1000);
+                }
+            } catch (error) {
+                document.getElementById('addResult').innerHTML = 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>
